@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#183b2d">
+<meta name="description" content="Compteur de belote avec scores, historique et statistiques.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png"><title>Compteur de belote</title>
+<style>
+:root{color-scheme:light;--bg:#edf2ed;--card:#fff;--ink:#183126;--muted:#66766c;--line:#d3ded5;--green:#28734d;--red:#b34b39;--soft:#e1eee5;--shadow:0 5px 18px #1635220d}
+:root.dark{color-scheme:dark;--bg:#141c18;--card:#202b25;--ink:#eef5ef;--muted:#a4b2a8;--line:#3a4940;--green:#74d39b;--red:#f08b78;--soft:#2b4133;--shadow:none}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:760px;margin:auto;padding:18px 14px 42px}h1{font-size:1.55rem;margin:0}h2{font-size:1.08rem;margin:0 0 12px}h3{font-size:.98rem;margin:0 0 8px}.sub{color:var(--muted);font-size:.9rem}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.top-actions{display:flex;gap:8px}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}.teams{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team{padding:13px;border-radius:14px;background:var(--soft);border-top:5px solid var(--green)}.team.b{border-color:var(--red)}.team input{font-weight:700;font-size:1rem;border:0;background:transparent;padding:4px 0}.score{font-size:2.6rem;font-weight:850;line-height:1.2;font-variant-numeric:tabular-nums}.track{height:6px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:7px}.track span{display:block;height:100%;background:var(--green)}.team.b .track span{background:var(--red)}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1;min-width:0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin:11px 0}.field label{display:block;color:var(--muted);font-size:.88rem;margin-bottom:5px}input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px;width:100%;min-width:0}input[type=checkbox]{width:auto;transform:scale(1.15);margin-right:8px}button{font:inherit;font-weight:650;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer}button:active{transform:scale(.99)}button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}button.danger{color:var(--red);border-color:var(--red)}button.small{font-size:.85rem;padding:7px 9px}.btnrow{display:flex;flex-wrap:wrap;gap:8px}.btnrow button{flex:1}.seg{display:flex;gap:6px}.seg button{flex:1}.seg button.active{background:var(--ink);color:var(--bg)}.hidden{display:none!important}.notice{padding:11px;border-radius:10px;background:var(--soft);margin:10px 0;font-size:.9rem}.win{text-align:center;padding:12px;background:var(--soft);border-radius:12px;font-weight:800;margin:12px 0}.hist{display:flex;flex-direction:column;gap:8px}.hand{border:1px solid var(--line);border-radius:12px;padding:11px}.hand-head{display:flex;justify-content:space-between;gap:8px;font-weight:750}.hand small{display:block;color:var(--muted);margin-top:5px}.hand-actions{display:flex;gap:6px;margin-top:8px}.hand-actions button{flex:1}.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{font-size:1.35rem;display:block}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px}.modal{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:18px;z-index:10}.modalbox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;width:min(100%,430px);box-shadow:0 12px 50px #0003}.modalbox p{color:var(--muted)}.footer{font-size:.8rem;color:var(--muted);text-align:center;margin-top:18px}.card-value-list{display:flex;flex-direction:column;gap:5px}.card-value-list>div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}.card-value-list>div:last-child{border-bottom:0}details summary{cursor:pointer;font-weight:700}.tag{font-size:.76rem;border-radius:20px;padding:3px 8px;background:var(--soft);display:inline-block}@media(max-width:480px){main{padding:13px 10px 30px}.card{padding:13px}.score{font-size:2.15rem}.top{align-items:flex-start}.top-actions{flex-direction:column}.grid2{grid-template-columns:1fr}.hand-head{font-size:.93rem}}
+</style></head>
+<body><main>
+<header class="top"><div><h1>🃏 Compteur de belote</h1><div class="sub">Compteur, historique et statistiques de partie</div></div><div class="top-actions"><button id="themeBtn" class="small" title="Changer le thème">🌙 Thème</button><button id="newBtn" class="small danger">＋ Nouvelle partie</button></div></header>
+<div id="winner" class="win hidden"></div>
+<section class="teams">
+ <div class="team"><input id="name0" aria-label="Nom équipe 1" value="Nous"><div id="score0" class="score">0</div><div class="track"><span id="bar0" style="width:0"></span></div><div id="progress0" class="sub">0 % de l'objectif</div></div>
+ <div class="team b"><input id="name1" aria-label="Nom équipe 2" value="Eux"><div id="score1" class="score">0</div><div class="track"><span id="bar1" style="width:0"></span></div><div id="progress1" class="sub">0 % de l'objectif</div></div>
+</section>
+<section class="card"><div class="section-title"><h2>Réglages de la partie</h2><span class="tag">Modifiables</span></div>
+ <div class="grid2"><div class="field"><label for="mode">Mode de jeu</label><select id="mode"><option value="classique">Belote classique</option><option value="coinche">Coinche</option></select></div><div class="field"><label for="target">Objectif de points</label><select id="target"><option>501</option><option>701</option><option selected>1000</option><option>1500</option><option>2000</option></select></div></div>
+ <details><summary>Règles de comptage</summary><p class="sub">En classique, le contrat est considéré réussi à partir de 82 points, en ajoutant la belote/rebelote si elle appartient à l'équipe preneuse. En coinche, les annonces et multiplicateurs varient selon les habitudes de table : ce compteur utilise une règle simplifiée et affiche le détail du calcul avant validation. Convenez des règles avant de jouer.</p><div class="field"><label for="coincheRule">Comptage coinche</label><select id="coincheRule"><option value="contract">Contrat réussi : points réalisés + contrat annoncé</option><option value="points">Contrat réussi : points des cartes uniquement</option></select></div></details>
+</section>
+<section class="card"><h2>Ajouter une donne</h2>
+ <div class="field"><label>Quelle équipe a pris ?</label><div class="seg" id="taker"><button data-team="0" class="active" id="take0">Nous</button><button data-team="1" id="take1">Eux</button></div></div>
+ <div id="contractFields" class="grid2 hidden"><div class="field"><label for="contract">Contrat annoncé</label><select id="contract"><option>80</option><option>90</option><option>100</option><option>110</option><option>120</option><option>130</option><option>140</option><option>150</option><option>160</option><option value="250">Capot (250)</option></select></div><div class="field"><label for="mult">Multiplicateur</label><select id="mult"><option value="1">Simple</option><option value="2">Coinché ×2</option><option value="4">Surcoinché ×4</option></select></div></div>
+ <div class="field"><label for="points">Points des cartes de l'équipe qui a pris (0 à 162)</label><input id="points" type="number" min="0" max="162" inputmode="numeric" placeholder="Ex. 92" value="90"></div>
+ <div class="field"><label for="belote">Belote et rebelote</label><select id="belote"><option value="-1">Aucune</option><option value="0">Nous (+20)</option><option value="1">Eux (+20)</option></select></div>
+ <div class="field"><label><input type="checkbox" id="capot"> Capot (tous les plis)</label></div>
+ <div id="preview" class="notice">Saisis les points pour prévisualiser le résultat.</div><div id="validation" class="sub" role="status"></div>
+ <div class="btnrow"><button class="primary" id="addBtn">Ajouter la donne</button><button id="clearForm">Effacer les champs</button></div>
+</section>
+<section class="card">
+ <div class="section-title"><h2>Aide au comptage des cartes</h2><button id="cardValuesBtn" class="small" aria-expanded="false" aria-controls="cardValuesPanel">🂡 Afficher les valeurs</button></div>
+ <div id="cardValuesPanel" class="hidden">
+  <p class="sub">Valeur des cartes à la belote, selon l’atout choisi. Les points des plis totalisent 162 points, dont 10 pour le dernier pli. La belote/rebelote vaut 20 points supplémentaires.</p>
+  <div class="grid2">
+   <div class="notice"><h3>À l’atout</h3><div class="card-value-list"><div><span>Valet</span><b>20 pts</b></div><div><span>9</span><b>14 pts</b></div><div><span>As</span><b>11 pts</b></div><div><span>10</span><b>10 pts</b></div><div><span>Roi</span><b>4 pts</b></div><div><span>Dame</span><b>3 pts</b></div><div><span>8 et 7</span><b>0 pt</b></div></div></div>
+   <div class="notice"><h3>Hors atout</h3><div class="card-value-list"><div><span>As</span><b>11 pts</b></div><div><span>10</span><b>10 pts</b></div><div><span>Roi</span><b>4 pts</b></div><div><span>Dame</span><b>3 pts</b></div><div><span>Valet</span><b>2 pts</b></div><div><span>9, 8 et 7</span><b>0 pt</b></div></div></div>
+  </div>
+  <div class="notice"><b>Repère rapide</b><br>À l’atout : Valet 20, 9 14. Hors atout : As 11, 10 10. Dans les deux cas, le dernier pli rapporte 10 points.</div>
+ </div>
+</section>
+<section class="card"><div class="section-title"><h2>Historique des donnes</h2><button id="undoBtn" class="small">↶ Annuler dernière</button></div><div id="history" class="hist"><div class="sub">Aucune donne enregistrée.</div></div></section>
+<section class="card"><h2>Statistiques de la partie</h2><div id="stats" class="statgrid"></div></section>
+<section class="card"><h2>Historique des parties</h2><div class="sub">Les parties terminées ou réinitialisées peuvent être archivées sur cet appareil.</div><div class="btnrow" style="margin:12px 0"><button id="archiveBtn">Archiver la partie actuelle</button><button id="shareBtn">Partager le résultat</button></div><div id="archives" class="hist"><div class="sub">Aucune partie archivée.</div></div></section>
+<section class="card"><h2>Mode arbitre</h2><div class="sub">Affiche les règles appliquées et le calcul détaillé de la dernière donne, pour vérifier le score à table.</div><div id="referee" class="notice">Ajoute une donne pour voir le détail.</div></section>
+<div class="footer">Les données sont enregistrées localement dans ce navigateur. Pour ne pas perdre l'historique, garde ce fichier et utilise le même navigateur.</div>
+</main>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><h2 id="modalTitle">Commencer une nouvelle partie ?</h2><p>Les scores et l'historique de la partie en cours seront effacés. Tu peux d'abord archiver la partie pour la conserver.</p><div class="btnrow"><button id="cancelReset">Annuler</button><button id="confirmReset" class="danger">Confirmer</button></div></div></div>
+<script>
+(()=>{'use strict';const $=id=>document.getElementById(id);const KEY='belote-complete-v2';let state={names:['Nous','Eux'],mode:'classique',target:1000,coincheRule:'contract',hands:[],archives:[],theme:'light'};let taker=0,editing=-1;
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&Array.isArray(saved.hands)){state={...state,...saved};}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function names(){return [($('name0').value.trim()||'Équipe 1'),($('name1').value.trim()||'Équipe 2')];}
+function scoreHand(h){let s=[0,0],other=1-h.taker,bel=h.belote,bt=bel>=0?20:0;let p=Number(h.points)||0;let success=false,detail='';if(h.mode==='classique'){success=h.capot||(p+(bel===h.taker?20:0)>=82);if(h.capot){s[h.taker]=252;detail='Capot : 252 points à l’équipe preneuse.';}else if(success){s[h.taker]=p;s[other]=162-p;detail=`Contrat réussi : ${p} points aux preneurs et ${162-p} aux défenseurs.`;}else{s[other]=162;detail=`Contrat chuté : les défenseurs marquent 162 points.`;}}
+ else {const c=Number(h.contract),m=Number(h.mult);success=h.capot||p+(bel===h.taker?20:0)>=c;if(h.capot){s[h.taker]=(c===250?500:252)*m;detail=`Capot annoncé, multiplicateur ×${m}.`;}else if(success){const base=state.coincheRule==='contract'?p+c:p;s[h.taker]=base*m;s[other]=Math.max(0,162-p)*m;detail=`Contrat réussi : (${p}${state.coincheRule==='contract'?' + '+c+' de contrat':''}) × ${m}. Défense : ${162-p} × ${m}.`;}else{s[other]=(162+c)*m;detail=`Contrat chuté : défense ${162} + contrat ${c}, puis × ${m}.`;}}
+ if(bel>=0){s[bel]+=20;detail+=` Belote/rebelote : +20 à ${h.names[bel]}.`;}return {s,success,detail};}
+function totals(){return state.hands.reduce((a,h)=>{const s=scoreHand(h).s;a[0]+=s[0];a[1]+=s[1];return a;},[0,0]);}
+function currentHand(){const v=$('points').value,p=Number(v);if(!$('capot').checked&&(v.trim()===''||!Number.isFinite(p)||p<0||p>162))return null;return {taker,points:$('capot').checked?162:p,belote:Number($('belote').value),capot:$('capot').checked,mode:state.mode,contract:Number($('contract').value),mult:Number($('mult').value),names:names(),coincheRule:state.coincheRule};}
+function renderPreview(){const h=currentHand();if(!h){$('preview').textContent='Entre un nombre entre 0 et 162 pour prévisualiser le résultat.';return;}const r=scoreHand(h);$('preview').innerHTML=`<b>Aperçu du résultat</b><br>${esc(h.names[0])} : <b>${r.s[0]}</b> points · ${esc(h.names[1])} : <b>${r.s[1]}</b> points<br><span class="sub">${esc(r.detail)}</span>`;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function render(){state.names=names();state.mode=$('mode').value;state.target=Number($('target').value);state.coincheRule=$('coincheRule').value;$('contractFields').classList.toggle('hidden',state.mode!=='coinche');$('take0').textContent=state.names[0];$('take1').textContent=state.names[1];$('take0').classList.toggle('active',taker===0);$('take1').classList.toggle('active',taker===1);const t=totals();for(let i=0;i<2;i++){ $('score'+i).textContent=t[i];const pct=Math.min(100,t[i]/state.target*100);$('bar'+i).style.width=pct+'%';$('progress'+i).textContent=Math.round(pct)+' % de l’objectif';}const winner=$('winner');if(Math.max(...t)>=state.target){winner.textContent='🏆 Victoire de '+state.names[t[0]>=t[1]?0:1]+' !';winner.classList.remove('hidden');}else winner.classList.add('hidden');
+ const hist=$('history');hist.innerHTML='';if(!state.hands.length)hist.innerHTML='<div class="sub">Aucune donne enregistrée.</div>';state.hands.slice().reverse().forEach((h,rev)=>{const idx=state.hands.length-1-rev,r=scoreHand(h),d=document.createElement('div');d.className='hand';d.innerHTML=`<div class="hand-head"><span>${esc(h.names[0])} : ${r.s[0]}</span><span>${esc(h.names[1])} : ${r.s[1]}</span></div><small>Donne ${idx+1} · Pris par ${esc(h.names[h.taker])} · ${h.mode==='coinche'?'Contrat '+h.contract+' ×'+h.mult:'Classique'}${h.capot?' · Capot':''}${h.belote>=0?' · Belote/rebelote':''}</small><div class="hand-actions"><button class="small" data-edit="${idx}">Modifier</button><button class="small danger" data-delete="${idx}">Supprimer</button><button class="small" data-detail="${idx}">Détail</button></div>`;hist.appendChild(d);});
+ const stats=$('stats');let made=0,failed=0,capots=0,belotes=0;state.hands.forEach(h=>{let r=scoreHand(h);if(r.success)made++;else failed++;if(h.capot)capots++;if(h.belote>=0)belotes++;});stats.innerHTML=`<div class="stat"><span class="sub">Donnes jouées</span><b>${state.hands.length}</b></div><div class="stat"><span class="sub">Contrats réussis</span><b>${made}</b></div><div class="stat"><span class="sub">Contrats chutés</span><b>${failed}</b></div><div class="stat"><span class="sub">Capots / belotes</span><b>${capots} / ${belotes}</b></div>`;
+ const ar=$('archives');ar.innerHTML='';if(!state.archives.length)ar.innerHTML='<div class="sub">Aucune partie archivée.</div>';state.archives.slice().reverse().forEach((a,rev)=>{const idx=state.archives.length-1-rev,d=document.createElement('div');d.className='hand';d.innerHTML=`<div class="hand-head"><span>${esc(a.names[0])} : ${a.totals[0]}</span><span>${esc(a.names[1])} : ${a.totals[1]}</span></div><small>${esc(a.date)} · ${a.hands.length} donne(s) · Objectif ${a.target}</small><div class="hand-actions"><button class="small" data-restore="${idx}">Recharger</button><button class="small danger" data-archive-delete="${idx}">Supprimer</button></div>`;ar.appendChild(d);});
+ if(state.hands.length){const h=state.hands[state.hands.length-1],r=scoreHand(h);$('referee').innerHTML=`<b>Dernière donne — ${r.success?'contrat réussi':'contrat chuté'}</b><br>${esc(r.detail)}<br><span class="sub">Résultat : ${esc(h.names[0])} ${r.s[0]} · ${esc(h.names[1])} ${r.s[1]}</span>`;}else $('referee').textContent='Ajoute une donne pour voir le détail.';
+ $('themeBtn').textContent=state.theme==='dark'?'☀️ Thème':'🌙 Thème';document.documentElement.classList.toggle('dark',state.theme==='dark');renderPreview();save();}
+function resetForm(){taker=0;editing=-1;$('points').value='90';$('belote').value='-1';$('capot').checked=false;$('contract').value='80';$('mult').value='1';$('addBtn').textContent='Ajouter la donne';$('validation').textContent='';renderPreview();}
+$('taker').addEventListener('click',e=>{const b=e.target.closest('[data-team]');if(b){taker=Number(b.dataset.team);render();}});
+['name0','name1','mode','target','contract','mult','points','belote','capot','coincheRule'].forEach(id=>$(id).addEventListener('input',render));
+$('addBtn').onclick=()=>{const h=currentHand();if(!h){$('validation').textContent='⚠️ Entre un nombre de points entre 0 et 162.';return;}if(h.mode==='coinche'&&h.contract===250&&!h.capot){$('validation').textContent='⚠️ Pour un contrat capot, coche également « Capot ». ';return;}if(editing>=0){state.hands[editing]=h;$('validation').textContent='Donne modifiée.';}else{state.hands.push(h);$('validation').textContent='Donne ajoutée.';}resetForm();render();};
+$('clearForm').onclick=resetForm;$('undoBtn').onclick=()=>{if(state.hands.length){state.hands.pop();resetForm();render();}};
+$('newBtn').onclick=()=> $('modal').classList.remove('hidden');$('cancelReset').onclick=()=> $('modal').classList.add('hidden');$('confirmReset').onclick=()=>{state.hands=[];resetForm();$('modal').classList.add('hidden');render();};
+$('cardValuesBtn').onclick=()=>{const panel=$('cardValuesPanel'),opening=panel.classList.contains('hidden');panel.classList.toggle('hidden',!opening);$('cardValuesBtn').textContent=opening?'✕ Masquer les valeurs':'🂡 Afficher les valeurs';$('cardValuesBtn').setAttribute('aria-expanded',String(opening));};
+$('themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';render();};
+$('archiveBtn').onclick=()=>{if(!state.hands.length){alert('Il n’y a aucune donne à archiver.');return;}state.archives.push({names:names(),totals:totals(),hands:JSON.parse(JSON.stringify(state.hands)),target:state.target,date:new Date().toLocaleString('fr-FR')});state.hands=[];resetForm();render();alert('Partie archivée. Tu peux la retrouver dans l’historique des parties.');};
+async function makeShareImage(){
+ const t=totals(),nm=names();
+ let appUrl='';
+ try{appUrl=localStorage.getItem('beloteShareAppUrl')||'';}catch(e){}
+ if(/^https?:$/.test(location.protocol))appUrl=location.href.split('#')[0];
+ if(!appUrl && location.protocol==='file:'){
+  const entered=prompt('Le compteur est ouvert depuis un fichier local et n’a pas encore de lien public. Si tu as déjà publié l’application, colle son lien ici. Sinon, laisse vide : tu pourras ajouter le lien après la mise en ligne.','');
+  if(entered && /^https?:\/\//i.test(entered.trim())){appUrl=entered.trim();try{localStorage.setItem('beloteShareAppUrl',appUrl);}catch(e){}}
+ }
+ const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=760;
+ const ctx=canvas.getContext('2d');
+ const bg=state.theme==='dark'?'#141c18':'#edf2ed',card=state.theme==='dark'?'#202b25':'#ffffff',ink=state.theme==='dark'?'#eef5ef':'#183126',muted=state.theme==='dark'?'#a4b2a8':'#66766c',green=state.theme==='dark'?'#74d39b':'#28734d',red=state.theme==='dark'?'#f08b78':'#b34b39';
+ ctx.fillStyle=bg;ctx.fillRect(0,0,1080,760);
+ function roundRect(x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
+ roundRect(48,42,984,676,30,card);
+ ctx.fillStyle=ink;ctx.font='bold 48px system-ui, sans-serif';ctx.fillText('🃏 Résultat de belote',86,120);
+ ctx.fillStyle=muted;ctx.font='26px system-ui, sans-serif';ctx.fillText(new Date().toLocaleDateString('fr-FR')+' · '+state.hands.length+' donne(s) · Objectif '+state.target,86,165);
+ roundRect(78,210,448,260,22,state.theme==='dark'?'#2b4133':'#e1eee5');
+ roundRect(554,210,448,260,22,state.theme==='dark'?'#3c2b27':'#f8e7e3');
+ ctx.fillStyle=green;ctx.font='bold 31px system-ui, sans-serif';ctx.fillText(nm[0].slice(0,24)||'Équipe 1',108,270);
+ ctx.fillStyle=red;ctx.fillText(nm[1].slice(0,24)||'Équipe 2',584,270);
+ ctx.fillStyle=green;ctx.font='bold 88px system-ui, sans-serif';ctx.fillText(String(t[0]),108,375);
+ ctx.fillStyle=red;ctx.fillText(String(t[1]),584,375);
+ ctx.fillStyle=muted;ctx.font='24px system-ui, sans-serif';ctx.fillText(Math.round(t[0]/state.target*100)+' % de l’objectif',108,420);ctx.fillText(Math.round(t[1]/state.target*100)+' % de l’objectif',584,420);
+ ctx.fillStyle=ink;ctx.font='bold 32px system-ui, sans-serif';const result=t[0]===t[1]?'Égalité':(t[0]>t[1]?nm[0]:nm[1])+' mène';ctx.fillText(result.slice(0,42),86,535);
+ ctx.fillStyle=muted;ctx.font='23px system-ui, sans-serif';ctx.fillText('Mode : '+(state.mode==='coinche'?'Coinche':'Belote classique'),86,585);
+ ctx.fillText('Compteur de belote',86,635);
+ if(appUrl){ctx.fillStyle=green;ctx.font='bold 22px system-ui, sans-serif';let shown=appUrl.length>68?appUrl.slice(0,65)+'…':appUrl;ctx.fillText('Jouer / ouvrir le compteur : '+shown,86,675);}
+ else{ctx.fillStyle=muted;ctx.font='21px system-ui, sans-serif';ctx.fillText('Lien de l’application à ajouter après sa mise en ligne',86,675);}
+ const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+ if(!blob)throw new Error('Impossible de créer l’image');
+ const file=new File([blob],'resultat-belote.png',{type:'image/png'});
+ const txt=`🃏 Résultat de belote\n${nm[0]} : ${t[0]} points\n${nm[1]} : ${t[1]} points\n${state.hands.length} donne(s) · Objectif ${state.target}\n${result}${appUrl?'\n\nOuvrir le compteur : '+appUrl:'\n\nLien du compteur disponible après sa mise en ligne.'}`;
+ if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+  await navigator.share({title:'Résultat de belote',text:txt,files:[file]});
+ }else{
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='resultat-belote.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  try{await navigator.clipboard.writeText(txt);alert('L’image du résultat a été téléchargée et le texte avec le lien a été copié. Tu peux joindre l’image dans ton message.');}
+  catch(e){prompt('L’image a été téléchargée. Copie ce texte pour accompagner la photo :',txt);}
+ }
+}
+$('shareBtn').onclick=async()=>{try{await makeShareImage();}catch(e){if(e.name!=='AbortError')alert('Le partage direct n’est pas disponible dans ce navigateur. Essaie de télécharger l’image du résultat.');}};
+$('history').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const idx=Number(b.dataset.edit??b.dataset.delete??b.dataset.detail);if(b.dataset.delete!==undefined){if(confirm('Supprimer cette donne ?')){state.hands.splice(idx,1);render();}}else if(b.dataset.edit!==undefined){const h=state.hands[idx];editing=idx;taker=h.taker;$('points').value=h.points;$('belote').value=h.belote;$('capot').checked=h.capot;$('mode').value=h.mode;$('contract').value=String(h.contract);$('mult').value=String(h.mult);$('addBtn').textContent='Enregistrer la modification';$('validation').textContent='Modification de la donne '+(idx+1)+'.';render();window.scrollTo({top:0,behavior:'smooth'});}else if(b.dataset.detail!==undefined){const h=state.hands[idx],r=scoreHand(h);alert(`Donne ${idx+1}\n${r.detail}\n${h.names[0]} : ${r.s[0]}\n${h.names[1]} : ${r.s[1]}`);}});
+$('archives').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const idx=Number(b.dataset.restore??b.dataset.archiveDelete);if(b.dataset.archiveDelete!==undefined){if(confirm('Supprimer cette partie archivée ?')){state.archives.splice(idx,1);render();}}else if(b.dataset.restore!==undefined){if(state.hands.length&&!confirm('Remplacer la partie en cours par cette archive ?'))return;const a=state.archives[idx];state.names=a.names.slice();state.hands=JSON.parse(JSON.stringify(a.hands));state.target=a.target;state.mode=state.hands[0]?.mode||'classique';$('name0').value=state.names[0];$('name1').value=state.names[1];$('target').value=String(state.target);$('mode').value=state.mode;resetForm();render();window.scrollTo({top:0,behavior:'smooth'});}});
+// Load current saved preferences into controls.
+$('name0').value=state.names[0];$('name1').value=state.names[1];$('mode').value=state.mode;$('target').value=String(state.target);$('coincheRule').value=state.coincheRule;render();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function (err) {
+      console.warn('Service worker non enregistré :', err);
+    });
+  });
+}
+</script>
+
+</body></html>
