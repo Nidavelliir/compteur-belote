@@ -1,10 +1,10 @@
 {
-  "id": "/compteur-belote/app",
+  "id": "/compteur-belote/belote-v2",
   "name": "Compteur de belote",
   "short_name": "Belote",
   "description": "Compteur de belote avec scores, historique et statistiques.",
   "lang": "fr-FR",
-  "start_url": "/compteur-belote/",
+  "start_url": "/compteur-belote/?source=app",
   "scope": "/compteur-belote/",
   "display": "standalone",
   "orientation": "portrait",
